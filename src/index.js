@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import YTSearch from 'youtube-api-search';
+import axios from 'axios';
 import SearchBar from './components/search_bar';
 import VideoList from './components/video_list';
 import VideoDetail from './components/video_detail';
 const API_KEY = 'xxxxxx';
+const ROOT_URL = 'https://www.googleapis.com/youtube/v3/search';
 
 class App extends Component {
   constructor(props) {
@@ -16,17 +17,38 @@ class App extends Component {
       selectedVideo: null
     };
 
-    this.videoSearch('Derek Banas');
+    this.videoSearch('s');
   }
 
+  mySearch(params, callback) {
+    axios.get(ROOT_URL, { params: params })
+      .then(function(response) {
+        if (callback) { callback(response.data.items); }
+      })
+      .catch(function(error) {
+        console.error(error);
+      });
+  };
+
   videoSearch(term) {
-    YTSearch({ key: API_KEY, term: term }, (videos) => {
+    var params = {
+      key: API_KEY,
+      part: 'snippet',
+      q: term,
+      type: 'video',
+      maxResults: 7,
+      channelId: 'UCwRXb5dUK4cvsHbx-rGzSgw',
+    };
+
+    this.mySearch(params, (videos) => {
       this.setState({
         videos: videos,
         selectedVideo: videos[0]
       });
     });
   }
+  // Darwin UCkPjHTuNd_ycm__29dXM3Nw
+  // Derek Banas UCwRXb5dUK4cvsHbx-rGzSgw
 
   render() {
     const videoSearch = _.debounce((term) => { this.videoSearch(term) }, 500);
